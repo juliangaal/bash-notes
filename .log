@@ -1,0 +1,71 @@
+# Logbook script
+path=/home/${USER}/logbook
+backup_path=/home/${USER}/.logbook_backup
+all=$(ls ~/logbook)
+number=$(ls ~/logbook | wc -l)
+editor=vim
+today=$(date "+%Y-%m-%d")
+
+
+log() {
+	if [ ! -d $path ]; then 
+		mkdir $path && cd $path
+	fi
+	
+	if [ ! $1 ]; then
+		file=${path}/${today}.md
+		
+		if [ ! -f $file ]; then
+			echo "#" >> ${file}
+			echo "### Log ${today}" >> ${file}
+		fi
+    	${editor} ${path}/${today}.md
+	else
+		if [[ $1 == *".md" ]]; then
+			name=${1}
+		else
+			name=${1}.md
+		fi
+		
+		file=${path}/${name}
+		${editor} ${file}
+	fi
+}
+
+log_backup() {
+	echo "Number of notes: $number"
+	echo "$all"
+	echo "Backing up"
+	backup_client="restic"
+	if [ -x "$(command -v ${backup_client})" ]; then
+		if [ ! -d ${backup_path} ]; then
+			restic init --repo ${backup_path}
+		fi
+		restic -r ${backup_path} backup ${backup_path}
+	else
+		echo "Restic is not installed!"
+		echo "See https://restic.readthedocs.io/en/latest/020_installation.html#from-source"		
+		echo "Terminating. Can't back up"
+	fi
+}
+
+log_show_all() {
+	echo "Number of notes: $number"
+	echo "$all"
+}
+
+log_info() {
+	echo "Number of notes: $number"
+	
+	unameOut="$(uname -s)"
+	case "${unameOut}" in
+    	Linux*)     machine=Linux;;
+    	Darwin*)    machine=Mac;;
+    	CYGWIN*)    machine=Cygwin;;
+    	MINGW*)     machine=MinGw;;
+    	*)          machine="UNKNOWN:${unameOut}"
+	esac
+	echo "System: ${machine}"
+	echo "Date: ${today}"
+}
+
