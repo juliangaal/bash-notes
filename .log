@@ -6,6 +6,9 @@ number=$(ls ~/logbook | wc -l)
 editor=vim
 today=$(date "+%Y-%m-%d")
 
+host=osmc
+servers=("${host}@192.168.1.115")
+locations=("/home/${host}/logbook_backup/")
 
 log() {
 	if [ ! -d $path ]; then 
@@ -32,16 +35,42 @@ log() {
 	fi
 }
 
+log_remote_backup() {	
+	if [ ! -x "$(command -v restic)" ]; then
+		echo "Rsync not installed. Installing..."
+		sudo apt-get install -y rsync
+	fi
+
+	printf "Backing up to "
+	for server in ${servers[*]}
+	do
+    	printf "%s, specifically\n" $server
+		for location in ${locations[*]}
+		do
+			echo  "${server}:${location}"
+			rsync -avuz ${backup_path}/ ${server}:${location}
+		done
+	done		
+}
+
 log_backup() {
 	echo "Number of notes: $number"
 	echo "$all"
-	echo "Backing up"
+	echo "Backing up locally"
 	backup_client="restic"
 	if [ -x "$(command -v ${backup_client})" ]; then
 		if [ ! -d ${backup_path} ]; then
 			restic init --repo ${backup_path}
 		fi
 		restic -r ${backup_path} backup ${backup_path}
+		
+		echo "Local backup done"	
+		read -p "Backup to remote location (y/n)? " choice
+		case "$choice" in 
+		y|Y ) log_remote_backup;;
+		n|N ) exit 1;;
+		* ) exit 1;;
+		esac
 	else
 		echo "Restic is not installed!"
 		echo "See https://restic.readthedocs.io/en/latest/020_installation.html#from-source"		
