@@ -11,13 +11,13 @@ servers=("${host}@192.168.1.115")
 locations=("/home/${host}/notes_backup/")
 
 log() {
-	if [ ! -d $path ]; then 
+	if [ ! -d $path ]; then
 		mkdir $path && cd $path
 	fi
-	
+
 	if [ ! $1 ]; then
 		file=${path}/${today}.md
-		
+
 		if [ ! -f $file ]; then
 			echo "#" >> ${file}
 			echo "### Log ${today}" >> ${file}
@@ -29,13 +29,13 @@ log() {
 		else
 			name=${1}.md
 		fi
-		
+
 		file=${path}/${name}
 		${editor} ${file}
 	fi
 }
 
-log_remote_backup() {	
+log_remote_backup() {
 	printf "Backing up to "
 	for server in ${servers[*]}
 	do
@@ -45,7 +45,24 @@ log_remote_backup() {
 			echo  "${server}:${location}"
 			rsync -avuz ${backup_path}/ ${server}:${location}
 		done
-	done		
+	done
+}
+
+log_sync() {
+	printf "Syncing from "
+	for server in ${servers[*]}
+	do
+    	printf "%s, specifically\n" $server
+		for location in ${locations[*]}
+		do
+			echo  "${server}:${location}"
+			flags="--xattrs --sparse"
+			cmd="${flags} ${server}:${location} ${backup_path}/"
+			echo $cmd
+			rsync $cmd
+			restic -r ${backup_path}/ restore latest --target $path
+		done
+	done
 }
 
 log_backup() {
@@ -58,17 +75,17 @@ log_backup() {
 			restic init --repo ${backup_path}
 		fi
 		restic -r ${backup_path} backup ${backup_path}
-		
-		echo "Local backup done"	
+
+		echo "Local backup done"
 		read -p "Backup to remote location (y/n)? " choice
-		case "$choice" in 
+		case "$choice" in
 		y|Y ) log_remote_backup;;
 		n|N ) exit 1;;
 		* ) exit 1;;
 		esac
 	else
 		echo "Restic is not installed!"
-		echo "See https://restic.readthedocs.io/en/latest/020_installation.html#from-source"		
+		echo "See https://restic.readthedocs.io/en/latest/020_installation.html#from-source"
 		echo "Terminating. Can't back up"
 	fi
 }
@@ -80,7 +97,7 @@ log_show_all() {
 
 log_info() {
 	echo "Number of notes: $number"
-	
+
 	unameOut="$(uname -s)"
 	case "${unameOut}" in
     	Linux*)     machine=Linux;;
