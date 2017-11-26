@@ -58,7 +58,6 @@ log_sync() {
 			echo  "${server}:${location}"
 			flags="--xattrs --sparse"
 			cmd="${flags} ${server}:${location} ${backup_path}/"
-			echo $cmd
 			rsync $cmd
 			restic -r ${backup_path}/ restore latest --target $path
 		done
