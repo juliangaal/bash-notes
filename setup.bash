@@ -1,6 +1,52 @@
 #!/bin/bash
 
-if [ -x "$(command -v restic)" ]; then
+install_mac() {
+	if [ ! "$(brew list | grep restic)" == "restic" ]; then
+		echo "Restic not installed. Installing . . ."
+		brew install restic
+	fi
+	if [ ! "$(brew list | grep rsync)" == "rsync" ]; then
+		echo "Rsync not installed. Installing . . ."
+		brew install rsync
+		fi
+}
+
+install_restic_linux() {
+	version=0.7.3
+	platform=linux_amd64
+	latest=https://github.com/restic/restic/releases/download/v${version}/restic_${version}_${platform}.bz2
+	bin=restic_0.7.3_linux_amd64
+	compressed=${bin}.bz2
+
+	echo ""
+	echo "Download file"
+	wget ${latest}
+
+	echo ""
+	echo "Move to /usr/local/bin"
+	sudo mv ${compressed} /usr/local/bin/
+
+	echo ""
+	echo "Decompress"
+	cd /usr/local/bin/ && sudo bzip2 -d ${compressed} 
+	sudo mv ${bin} restic
+
+	echo ""
+	echo "Make executable"
+	sudo chmod +x restic 
+
+	echo ""
+	echo "Test"
+	restic version
+}
+
+install_brew() {
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+}
+
+now=$(date +"%r %a %d %h %y")
+if [ -x "$(command -v restic)" ] && [ -x "$(command -v rsync)" ]; then
+	echo "Everything you need is installed"
 	exit 1
 fi
 
@@ -12,52 +58,33 @@ case "${unameOut}" in
     	MINGW*)     machine=MinGw;;
     	*)          machine="UNKNOWN:${unameOut}"
 esac
+echo "$now"
 echo "System: ${machine}"
+sleep 1
+
+cd ~
+echo "Getting necessary files..."
+wget https://raw.githubusercontent.com/juliangaal/bash-notes/master/.log
 
 if [[ ${machine} == "Linux" ]]; then
 	if [ ! -x "$(command -v restic)" ]; then
-		version=0.7.3
-		platform=linux_amd64
-		latest=https://github.com/restic/restic/releases/download/v${version}/restic_${version}_${platform}.bz2
-		bin=restic_0.7.3_linux_amd64
-		compressed=${bin}.bz2
-
-		echo ""
-		echo "Download file"
-		wget ${latest}
-
-		echo ""
-		echo "Move to /usr/local/bin"
-		sudo mv ${compressed} /usr/local/bin/
-
-		echo ""
-		echo "Decompress"
-		cd /usr/local/bin/ && sudo bzip2 -d ${compressed} 
-		sudo mv ${bin} restic
-
-		echo ""
-		echo "Make executable"
-		sudo chmod +x restic 
-
-		echo ""
-		echo "Test"
-		restic version
+		install_restic_linux
 	fi
 	
 	if [ ! -x "$(command -v rsync)" ]; then
 		echo "Rsync not installed. Installing..."
 		sudo apt-get install -y rsync
 	fi
-
+	
+	echo "source ~/.log" >> ~/.bashrc
+	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
 
 if [[ ${machine} == "Mac" ]]; then
 		
 		if [ -x "$(command -v brew)" ]; then
-			echo "Installing restic, rsync with brew"
 			brew update && brew upgrade
-			brew install restic
-			brew install rsync
+			install_mac
 		else
 			echo ""
 			echo "Brew is not installed, do you want to install?"
@@ -69,10 +96,13 @@ if [[ ${machine} == "Mac" ]]; then
 			esac
 
 			if [[ ${chosen} == "yes" ]]; then
-				/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-				brew install restic
+				install_brew
+				install_mac
 			else
 				echo "Not installing. Break"
 			fi
 		fi
+	echo "source ~/.log" >> ~/.bash_profile	
+	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
+
