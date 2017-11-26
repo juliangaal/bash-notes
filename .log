@@ -94,10 +94,7 @@ log_show_all() {
 	echo "$all"
 }
 
-log_info() {
-	echo $now
-	echo "Number of notes: $number"
-	
+log_info() {	
 	unameOut="$(uname -s)"
 	case "${unameOut}" in
     	Linux*)     machine=Linux;;
@@ -107,6 +104,7 @@ log_info() {
     	*)          machine="UNKNOWN:${unameOut}"
 	esac
 	echo "System: ${machine}"
-	echo "Time: $now"
+	echo $now
+	echo "Number of notes: $number"
 }
 
