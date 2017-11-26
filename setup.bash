@@ -65,10 +65,10 @@ case "${unameOut}" in
 esac
 
 echo "$now"
-echo "System: ${machine}"
-sleep 1
 
 if [[ ${machine} == "Linux" ]]; then
+	echo "System: ${machine}"
+	sleep 1
 	if [ -x "$(command -v restic)" ] && [ -x "$(command -v rsync)" ]; then
 		echo "Everything you need is installed"
 		exit 1
@@ -90,28 +90,29 @@ if [[ ${machine} == "Linux" ]]; then
 fi
 
 if [[ ${machine} == "Mac" ]]; then
-		
-		if [ -x "$(command -v brew)" ]; then
-			brew update && brew upgrade
+	echo "System: ${machine}"
+	sleep 1
+	if [ -x "$(command -v brew)" ]; then
+		brew update && brew upgrade
+		install_mac
+	else
+		echo ""
+		echo "Brew is not installed, do you want to install?"
+		read -p "Continue (y/n)?" choice
+		case "$choice" in 
+			y|Y ) chosen="yes";;
+			n|N ) chosen="no";;
+			* ) chosen="invalid";;
+		esac
+
+		if [[ ${chosen} == "yes" ]]; then
+			install_brew
 			install_mac
 		else
-			echo ""
-			echo "Brew is not installed, do you want to install?"
-			read -p "Continue (y/n)?" choice
-			case "$choice" in 
-				y|Y ) chosen="yes";;
-				n|N ) chosen="no";;
-				* ) chosen="invalid";;
-			esac
-
-			if [[ ${chosen} == "yes" ]]; then
-				install_brew
-				install_mac
-			else
-				echo "Not installing. Break"
-				exit 1
-			fi
+			echo "Not installing. Break"
+			exit 1
 		fi
+	fi
 		
 	get_files
 	mkdir /Users/${USER}/log
