@@ -1,7 +1,5 @@
 #!/bin/bash
 now=$(date +"%r %a %d %h %y")
-home_path=/home/${USER}
-path=${home_path}/log
 
 install_mac() {
 	if [ ! "$(brew list | grep restic)" == "restic" ]; then
@@ -86,8 +84,8 @@ if [[ ${machine} == "Linux" ]]; then
 	fi
 	
 	get_files
-	mkdir $path
-	echo "source ~/.log" >> ~/.bashrc
+	mkdir /home/${USER}/log
+	echo "source /home/${USER}/.log" >> ~/.bashrc
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
 
@@ -116,8 +114,8 @@ if [[ ${machine} == "Mac" ]]; then
 		fi
 		
 	get_files
-	mkdir $path
-	echo "source ~/.log" >> ~/.bash_profile	
+	mkdir /Users/${USER}/log
+	echo "source /Users/${USER}/.log" >> ~/.bash_profile	
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
 
