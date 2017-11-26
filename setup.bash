@@ -15,39 +15,49 @@ esac
 echo "System: ${machine}"
 
 if [[ ${machine} == "Linux" ]]; then
-	version=0.7.3
-	platform=linux_amd64
-	latest=https://github.com/restic/restic/releases/download/v${version}/restic_${version}_${platform}.bz2
-	bin=restic_0.7.3_linux_amd64
-	compressed=${bin}.bz2
+	if [ ! -x "$(command -v restic)" ]; then
+		version=0.7.3
+		platform=linux_amd64
+		latest=https://github.com/restic/restic/releases/download/v${version}/restic_${version}_${platform}.bz2
+		bin=restic_0.7.3_linux_amd64
+		compressed=${bin}.bz2
 
-	echo ""
-	echo "Download file"
-	wget ${latest}
+		echo ""
+		echo "Download file"
+		wget ${latest}
 
-	echo ""
-	echo "Move to /usr/local/bin"
-	sudo mv ${compressed} /usr/local/bin/
+		echo ""
+		echo "Move to /usr/local/bin"
+		sudo mv ${compressed} /usr/local/bin/
 
-	echo ""
-	echo "Decompress"
-	cd /usr/local/bin/ && sudo bzip2 -d ${compressed} 
-	sudo mv ${bin} restic
+		echo ""
+		echo "Decompress"
+		cd /usr/local/bin/ && sudo bzip2 -d ${compressed} 
+		sudo mv ${bin} restic
 
-	echo ""
-	echo "Make executable"
-	sudo chmod +x restic 
+		echo ""
+		echo "Make executable"
+		sudo chmod +x restic 
 
-	echo ""
-	echo "Test"
-	restic version
+		echo ""
+		echo "Test"
+		restic version
+	fi
+	
+	if [ ! -x "$(command -v rsync)" ]; then
+		echo "Rsync not installed. Installing..."
+		sudo apt-get install -y rsync
+	fi
+
 fi
 
 if [[ ${machine} == "Mac" ]]; then
 		
 		if [ -x "$(command -v brew)" ]; then
-			echo "Installing restic with brew"
+			echo "Installing restic, rsync with brew"
+			brew update && brew upgrade
 			brew install restic
+			brew install rsync
 		else
 			echo ""
 			echo "Brew is not installed, do you want to install?"

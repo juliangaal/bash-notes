@@ -36,11 +36,6 @@ log() {
 }
 
 log_remote_backup() {	
-	if [ ! -x "$(command -v restic)" ]; then
-		echo "Rsync not installed. Installing..."
-		sudo apt-get install -y rsync
-	fi
-
 	printf "Backing up to "
 	for server in ${servers[*]}
 	do
