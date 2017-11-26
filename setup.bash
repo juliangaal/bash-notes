@@ -1,4 +1,7 @@
 #!/bin/bash
+now=$(date +"%r %a %d %h %y")
+home_path=/home/${USER}
+path=${home_path}/log
 
 install_mac() {
 	if [ ! "$(brew list | grep restic)" == "restic" ]; then
@@ -13,7 +16,6 @@ install_mac() {
 		echo "Wget not installed. Installing . . ."
 		brew install wget
 	fi
-	
 }
 
 install_restic_linux() {
@@ -55,12 +57,6 @@ get_files() {
 	wget https://raw.githubusercontent.com/juliangaal/bash-notes/master/.log
 }
 
-now=$(date +"%r %a %d %h %y")
-if [ -x "$(command -v restic)" ] && [ -x "$(command -v rsync)" ]; then
-	echo "Everything you need is installed"
-	exit 1
-fi
-
 unameOut="$(uname -s)"
 case "${unameOut}" in
     	Linux*)     machine=Linux;;
@@ -69,11 +65,17 @@ case "${unameOut}" in
     	MINGW*)     machine=MinGw;;
     	*)          machine="UNKNOWN:${unameOut}"
 esac
+
 echo "$now"
 echo "System: ${machine}"
 sleep 1
 
 if [[ ${machine} == "Linux" ]]; then
+	if [ -x "$(command -v restic)" ] && [ -x "$(command -v rsync)" ]; then
+		echo "Everything you need is installed"
+		exit 1
+	fi
+	
 	if [ ! -x "$(command -v restic)" ]; then
 		install_restic_linux
 	fi
@@ -84,6 +86,7 @@ if [[ ${machine} == "Linux" ]]; then
 	fi
 	
 	get_files
+	mkdir $path
 	echo "source ~/.log" >> ~/.bashrc
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
@@ -108,10 +111,12 @@ if [[ ${machine} == "Mac" ]]; then
 				install_mac
 			else
 				echo "Not installing. Break"
+				exit 1
 			fi
 		fi
 		
 	get_files
+	mkdir $path
 	echo "source ~/.log" >> ~/.bash_profile	
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
