@@ -8,7 +8,12 @@ install_mac() {
 	if [ ! "$(brew list | grep rsync)" == "rsync" ]; then
 		echo "Rsync not installed. Installing . . ."
 		brew install rsync
-		fi
+	fi
+	if [ ! "$(brew list | grep wget)" == "wget" ]; then
+		echo "Wget not installed. Installing . . ."
+		brew install wget
+	fi
+	
 }
 
 install_restic_linux() {
@@ -44,6 +49,12 @@ install_brew() {
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 }
 
+get_files() {
+	cd ~
+	echo "Getting necessary files..."
+	wget https://raw.githubusercontent.com/juliangaal/bash-notes/master/.log
+}
+
 now=$(date +"%r %a %d %h %y")
 if [ -x "$(command -v restic)" ] && [ -x "$(command -v rsync)" ]; then
 	echo "Everything you need is installed"
@@ -62,10 +73,6 @@ echo "$now"
 echo "System: ${machine}"
 sleep 1
 
-cd ~
-echo "Getting necessary files..."
-wget https://raw.githubusercontent.com/juliangaal/bash-notes/master/.log
-
 if [[ ${machine} == "Linux" ]]; then
 	if [ ! -x "$(command -v restic)" ]; then
 		install_restic_linux
@@ -76,6 +83,7 @@ if [[ ${machine} == "Linux" ]]; then
 		sudo apt-get install -y rsync
 	fi
 	
+	get_files
 	echo "source ~/.log" >> ~/.bashrc
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
@@ -102,6 +110,8 @@ if [[ ${machine} == "Mac" ]]; then
 				echo "Not installing. Break"
 			fi
 		fi
+		
+	get_files
 	echo "source ~/.log" >> ~/.bash_profile	
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
