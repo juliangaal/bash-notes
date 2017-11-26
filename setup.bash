@@ -84,7 +84,7 @@ if [[ ${machine} == "Linux" ]]; then
 	fi
 	
 	get_files
-	mkdir /home/${USER}/log
+	mkdir /home/${USER}/notes
 	echo "source /home/${USER}/.log" >> ~/.bashrc
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi
@@ -115,7 +115,7 @@ if [[ ${machine} == "Mac" ]]; then
 	fi
 		
 	get_files
-	mkdir /Users/${USER}/log
+	mkdir /Users/${USER}/notes
 	echo "source /Users/${USER}/.log" >> ~/.bash_profile	
 	echo "Resource bash_profile with 'source ~/.bash_profile' or open new terminal"	
 fi

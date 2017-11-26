@@ -1,14 +1,14 @@
 # Logbook script
-path=/home/${USER}/logbook
-backup_path=/home/${USER}/.logbook_backup
-all=$(ls ~/logbook)
-number=$(ls ~/logbook | wc -l)
+path=~/notes
+backup_path=~/.notes_backup
+all=$(ls ~/notes)
+number=$(ls ~/notes | wc -l)
 editor=vim
 today=$(date "+%Y-%m-%d")
 
 host=osmc
 servers=("${host}@192.168.1.115")
-locations=("/home/${host}/logbook_backup/")
+locations=("/home/${host}/notes_backup/")
 
 log() {
 	if [ ! -d $path ]; then 
